@@ -16,7 +16,7 @@ body {
     background: white;
     border-radius: 20px;
     padding: 30px;
-    max-width: 500px;
+    max-width: 520px;
     margin: auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
@@ -56,19 +56,27 @@ body {
 }
 
 .keyboard {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     margin-top: 20px;
 }
 
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
 .key {
     padding: 14px;
+    min-width: 36px;
     font-size: 22px;
     background: #2196f3;
     color: white;
     border-radius: 10px;
     cursor: pointer;
+    user-select: none;
 }
 
 .key:active {
@@ -198,19 +206,34 @@ function checkInput(char) {
     }
 }
 
+// Physical keyboard support
 document.addEventListener("keydown", e => {
     if (/^[a-zA-Z]$/.test(e.key)) {
         checkInput(e.key.toUpperCase());
     }
 });
 
+// QWERTY ON-SCREEN KEYBOARD
 const keyboard = document.getElementById("keyboard");
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => {
-    const key = document.createElement("div");
-    key.textContent = letter;
-    key.className = "key";
-    key.onclick = () => checkInput(letter);
-    keyboard.appendChild(key);
+const qwerty = [
+    "QWERTYUIOP",
+    "ASDFGHJKL",
+    "ZXCVBNM"
+];
+
+qwerty.forEach(row => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "key-row";
+
+    row.split("").forEach(letter => {
+        const key = document.createElement("div");
+        key.className = "key";
+        key.textContent = letter;
+        key.onclick = () => checkInput(letter);
+        rowDiv.appendChild(key);
+    });
+
+    keyboard.appendChild(rowDiv);
 });
 
 pickItem();
