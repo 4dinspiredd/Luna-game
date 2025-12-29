@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kids Typing Game</title>
+
+<style>
+body {
+    font-family: "Comic Sans MS", Arial, sans-serif;
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    text-align: center;
+    padding: 20px;
+}
+
+#card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    margin: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#emoji {
+    font-size: 90px;
+}
+
+#word {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.letter-box {
+    width: 60px;
+    height: 70px;
+    font-size: 40px;
+    line-height: 70px;
+    border-radius: 10px;
+    background: #ddd;
+}
+
+.current {
+    background: #ffeb3b;
+}
+
+.correct {
+    background: #4caf50;
+    color: white;
+}
+
+#message {
+    font-size: 28px;
+    height: 35px;
+}
+
+.keyboard {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.key {
+    padding: 14px;
+    font-size: 22px;
+    background: #2196f3;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.key:active {
+    transform: scale(0.95);
+}
+
+button {
+    font-size: 20px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #ff9800;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎉 Typing Fun 🎉</h1>
+
+<div id="card">
+    <div id="emoji">🍎</div>
+    <div id="word"></div>
+    <div id="message"></div>
+</div>
+
+<div class="keyboard" id="keyboard"></div>
+
+<button onclick="speak()">🔊 Hear It Again</button>
+
+<script>
+// LETTERS
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => ({
+    text: l,
+    emoji: "🔤",
+    sound: l
+}));
+
+// WORD LIST (30 words, 3 & 4 letters)
+const words = [
+    { text: "CAT", emoji: "🐱" },
+    { text: "DOG", emoji: "🐶" },
+    { text: "SUN", emoji: "☀️" },
+    { text: "CAR", emoji: "🚗" },
+    { text: "HAT", emoji: "🎩" },
+    { text: "PEN", emoji: "🖊️" },
+    { text: "BED", emoji: "🛏️" },
+    { text: "BOX", emoji: "📦" },
+    { text: "CUP", emoji: "☕" },
+    { text: "BAT", emoji: "🏏" },
+
+    { text: "BALL", emoji: "⚽" },
+    { text: "FISH", emoji: "🐟" },
+    { text: "TREE", emoji: "🌳" },
+    { text: "BOOK", emoji: "📘" },
+    { text: "BIRD", emoji: "🐦" },
+    { text: "STAR", emoji: "⭐" },
+    { text: "MILK", emoji: "🥛" },
+    { text: "FROG", emoji: "🐸" },
+    { text: "SHIP", emoji: "🚢" },
+    { text: "FIRE", emoji: "🔥" },
+
+    { text: "MOON", emoji: "🌙" },
+    { text: "RAIN", emoji: "🌧️" },
+    { text: "SNOW", emoji: "❄️" },
+    { text: "WIND", emoji: "🌬️" },
+    { text: "LION", emoji: "🦁" },
+    { text: "BEAR", emoji: "🐻" },
+    { text: "DUCK", emoji: "🦆" },
+    { text: "CAKE", emoji: "🎂" },
+    { text: "BELL", emoji: "🔔" },
+    { text: "KEYS", emoji: "🔑" }
+].map(w => ({ ...w, sound: w.text.toLowerCase() }));
+
+const items = [...letters, ...words];
+
+let current = {};
+let index = 0;
+
+function pickItem() {
+    current = items[Math.floor(Math.random() * items.length)];
+    index = 0;
+    document.getElementById("emoji").textContent = current.emoji;
+    document.getElementById("message").textContent = "";
+    drawWord();
+    speak();
+}
+
+function drawWord() {
+    const wordDiv = document.getElementById("word");
+    wordDiv.innerHTML = "";
+
+    current.text.split("").forEach((letter, i) => {
+        const box = document.createElement("div");
+        box.textContent = letter;
+        box.className = "letter-box";
+
+        if (i < index) box.classList.add("correct");
+        else if (i === index) box.classList.add("current");
+
+        wordDiv.appendChild(box);
+    });
+}
+
+function speak() {
+    const msg = new SpeechSynthesisUtterance(current.sound);
+    msg.rate = 0.8;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(msg);
+}
+
+function checkInput(char) {
+    if (char !== current.text[index]) {
+        document.getElementById("message").textContent = "❌ Try Again!";
+        return;
+    }
+
+    index++;
+    drawWord();
+
+    if (index === current.text.length) {
+        document.getElementById("message").textContent = "✅ Great Job!";
+        setTimeout(pickItem, 700);
+    }
+}
+
+document.addEventListener("keydown", e => {
+    if (/^[a-zA-Z]$/.test(e.key)) {
+        checkInput(e.key.toUpperCase());
+    }
+});
+
+const keyboard = document.getElementById("keyboard");
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => {
+    const key = document.createElement("div");
+    key.textContent = letter;
+    key.className = "key";
+    key.onclick = () => checkInput(letter);
+    keyboard.appendChild(key);
+});
+
+pickItem();
+</script>
+
+</body>
+</html>
